@@ -12,7 +12,7 @@ const Logo = () => (
 );
 
 const QuoteIcon = () => (
-    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ color: '#0ea5e9', opacity: 0.2, position: 'absolute', top: '1rem', left: '1rem' }}>
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ color: '#0ea5e9', opacity: 0.1, position: 'absolute', top: '1rem', right: '1rem', zIndex: 1 }}>
         <path d="M10 11H6.5C5.12 11 4 12.12 4 13.5V17.5C4 18.88 5.12 20 6.5 20H10V16H7V14H10V11ZM18 11H14.5C13.12 11 12 12.12 12 13.5V17.5C12 18.88 13.12 20 14.5 20H18V16H15V14H18V11Z" fill="currentColor"/>
     </svg>
 );
@@ -38,8 +38,8 @@ const ExternalLinkIcon = () => (
     </svg>
 );
 
-const SocialIcon = ({ href, children }) => (
-    <a href={href} target="_blank" rel="noopener noreferrer" style={styles.socialIconLink}>
+const SocialIcon = ({ href, children, vertical = false }) => (
+    <a href={href} target="_blank" rel="noopener noreferrer" style={vertical ? styles.socialIconLinkVertical : styles.socialIconLink}>
         {children}
     </a>
 );
@@ -56,6 +56,7 @@ const styles = {
         padding: 0,
         boxSizing: 'border-box',
         lineHeight: 1.6,
+        overflowX: 'hidden',
     },
     container: {
         maxWidth: '1100px',
@@ -71,8 +72,8 @@ const styles = {
         backdropFilter: 'blur(10px)',
         padding: '1rem 0',
         zIndex: 100,
-        transition: 'top 0.3s, background-color 0.3s, box-shadow 0.3s',
-        borderBottom: '1px solid rgba(14, 165, 233, 0.1)',
+        transition: 'top 0.3s, background-color 0.3s, box-shadow 0.3s, border-bottom-color 0.3s',
+        borderBottom: '1px solid transparent',
     },
     nav: {
         display: 'flex',
@@ -113,6 +114,8 @@ const styles = {
         flexDirection: 'column',
         justifyContent: 'center',
         padding: '0 2rem',
+        position: 'relative',
+        overflow: 'hidden',
     },
     heroSubtitle: {
         color: '#0ea5e9',
@@ -130,6 +133,7 @@ const styles = {
         color: '#94a3b8',
         marginTop: '0.5rem',
         fontWeight: 600,
+        height: 'clamp(24px, 6vw, 48px)', // Reserve space to prevent layout shift
     },
     heroDescription: {
         maxWidth: '540px',
@@ -143,15 +147,16 @@ const styles = {
         gap: '1rem',
     },
     ctaButton: {
-        backgroundColor: '#0ea5e9',
+        background: 'linear-gradient(90deg, #0ea5e9, #2563eb)',
         color: '#f8fafc',
         border: 'none',
         padding: '1rem 1.75rem',
-        borderRadius: '4px',
+        borderRadius: '6px',
         fontSize: '1rem',
         fontWeight: '600',
         cursor: 'pointer',
         transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+        boxShadow: '0 4px 15px rgba(14, 165, 233, 0.4)',
     },
     // Section Styles
     section: {
@@ -159,31 +164,21 @@ const styles = {
         opacity: 0,
         transform: 'translateY(20px)',
         transition: 'opacity 0.6s ease-out, transform 0.6s ease-out',
+        position: 'relative',
     },
     sectionVisible: { opacity: 1, transform: 'translateY(0)' },
     sectionTitle: {
         fontSize: 'clamp(2rem, 5vw, 2.5rem)',
         fontWeight: 'bold',
         color: '#f8fafc',
-        marginBottom: '3rem',
+        marginBottom: '4rem',
         textAlign: 'center',
         position: 'relative',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '1rem',
-    },
-    sectionTitleLine: {
-        content: '""',
-        display: 'block',
-        width: '100px',
-        height: '1px',
-        backgroundColor: '#1e293b',
     },
     // About Section
     aboutContent: {
         display: 'grid',
-        gridTemplateColumns: '3fr 2fr',
+        gridTemplateColumns: '1fr 1fr',
         gap: '50px',
         alignItems: 'flex-start',
     },
@@ -191,13 +186,39 @@ const styles = {
         maxWidth: '300px',
         position: 'relative',
         borderRadius: '8px',
-        border: '1px solid #1e293b',
-        padding: '8px',
+        background: 'linear-gradient(145deg, #0ea5e9, #2563eb)',
+        padding: '4px',
+        boxShadow: '0 0 30px rgba(14, 165, 233, 0.3)',
+        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
     },
     aboutImage: {
         width: '100%',
-        borderRadius: '4px',
+        borderRadius: '6px',
+        display: 'block',
+    },
+    aboutTextContainer: {
+        // New container for text content
+    },
+    tabsContainer: {
+        marginTop: '2rem',
+        display: 'flex',
+        borderBottom: '1px solid #1e293b',
+    },
+    tabButton: {
+        padding: '1rem 1.5rem',
+        border: 'none',
+        background: 'none',
+        color: '#94a3b8',
+        cursor: 'pointer',
+        fontSize: '1rem',
         position: 'relative',
+        transition: 'color 0.3s ease',
+    },
+    activeTab: {
+        color: '#0ea5e9',
+    },
+    tabContent: {
+        paddingTop: '2rem',
     },
     skillsContainer: {
         marginTop: '2.5rem',
@@ -214,6 +235,11 @@ const styles = {
         display: 'flex',
         alignItems: 'center',
         gap: '0.75rem',
+        background: 'rgba(15, 23, 42, 0.5)',
+        padding: '0.5rem 1rem',
+        borderRadius: '4px',
+        border: '1px solid #1e293b',
+        transition: 'color 0.3s, border-color 0.3s',
     },
     // Services Section
     servicesGrid: {
@@ -227,7 +253,7 @@ const styles = {
         padding: '2rem',
         borderRadius: '8px',
         boxShadow: '0 4px 10px rgba(0, 0, 0, 0.2)',
-        transition: 'transform 0.3s ease, border-color 0.3s ease',
+        transition: 'transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease',
         backdropFilter: 'blur(5px)',
     },
     serviceIcon: { marginBottom: '1.5rem' },
@@ -248,65 +274,39 @@ const styles = {
         borderRadius: '8px',
         overflow: 'hidden',
         boxShadow: '0 4px 10px rgba(0, 0, 0, 0.2)',
-        transition: 'transform 0.3s ease',
+        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
         display: 'flex',
         flexDirection: 'column',
-    },
-    portfolioImageContainer: {
         position: 'relative',
-        height: '200px',
+        border: '1px solid #1e293b',
     },
     portfolioImage: {
         width: '100%',
-        height: '100%',
+        height: '220px',
         objectFit: 'cover',
         transition: 'transform 0.4s ease',
     },
-    portfolioOverlay: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        backgroundColor: 'rgba(2, 6, 23, 0.7)',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        gap: '1.5rem',
-        opacity: 0,
-        transition: 'opacity 0.4s ease',
-    },
-    portfolioLink: {
-        color: '#f8fafc',
-        textDecoration: 'none',
-        padding: '0.5rem',
-        borderRadius: '50%',
-        border: '1px solid #f8fafc',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        transition: 'background-color 0.3s ease, color 0.3s ease',
-    },
     portfolioContent: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
         padding: '1.5rem',
-        flexGrow: 1,
-        display: 'flex',
-        flexDirection: 'column',
+        background: 'linear-gradient(to top, rgba(15, 23, 42, 1) 50%, rgba(15, 23, 42, 0))',
+        transform: 'translateY(100%)',
+        transition: 'transform 0.4s ease',
+        visibility: 'hidden',
     },
     portfolioTitle: {
         fontSize: '1.4rem',
         color: '#f8fafc',
         marginBottom: '0.5rem',
     },
-    portfolioDescription: {
-        color: '#94a3b8',
-        marginBottom: '1rem',
-        flexGrow: 1,
-    },
     portfolioTags: {
         display: 'flex',
         flexWrap: 'wrap',
         gap: '0.5rem',
+        marginTop: '1rem',
     },
     portfolioTag: {
         backgroundColor: '#020617',
@@ -327,11 +327,14 @@ const styles = {
         padding: '2.5rem 2rem 2rem 2rem',
         borderRadius: '8px',
         position: 'relative',
+        transition: 'border-color 0.3s, box-shadow 0.3s',
     },
     testimonialQuote: {
         color: '#e2e8f0',
         fontStyle: 'italic',
         marginBottom: '1.5rem',
+        position: 'relative',
+        zIndex: 2,
     },
     testimonialAuthor: {
         fontWeight: 'bold',
@@ -391,6 +394,40 @@ const styles = {
         backgroundColor: '#0ea5e9',
         transition: 'transform 0.3s ease-in-out, opacity 0.3s ease-in-out',
     },
+    // Social Sidebar
+    socialSidebar: {
+        position: 'fixed',
+        bottom: '0',
+        left: '40px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '1rem',
+        zIndex: 10,
+    },
+    socialSidebarLine: {
+        width: '1px',
+        height: '90px',
+        backgroundColor: '#94a3b8',
+    },
+    socialIconLinkVertical: {
+        color: '#94a3b8',
+        transition: 'color 0.3s ease, transform 0.3s ease',
+        padding: '10px',
+    },
+    // Scroll Down Indicator
+    scrollIndicator: {
+        position: 'absolute',
+        bottom: '30px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        color: '#0ea5e9',
+        fontSize: '0.8rem',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '0.5rem',
+    },
 };
 
 // --- DUMMY DATA ---
@@ -405,6 +442,7 @@ const testimonials = [
     { quote: "The AI-powered ad campaigns developed by Muhammad Musab delivered an incredible ROI. His data-driven approach minimized our ad spend while maximizing conversions.", author: "Marketing Director", company: "Noor Resin Industry" },
     { quote: "Working with Musab elevated our brand's online presence significantly. His digital marketing skills helped us connect with a wider audience and grow our community.", author: "Founder", company: "Zeenat Styles Handbags" },
 ];
+const typingTexts = ["I build results for the web.", "I create AI-powered ads.", "I specialize in SEO."];
 
 // --- HOOK FOR SCROLL ANIMATION ---
 const useOnScreen = (options) => {
@@ -461,7 +499,7 @@ const Header = () => {
     const headerStyle = {
         ...styles.header,
         backgroundColor: scrolled ? 'rgba(2, 6, 23, 0.6)' : 'transparent',
-        borderBottom: scrolled ? '1px solid rgba(14, 165, 233, 0.1)' : '1px solid transparent',
+        borderBottomColor: scrolled ? 'rgba(14, 165, 233, 0.1)' : 'transparent',
         boxShadow: scrolled ? '0 10px 30px -10px rgba(2, 12, 27, 0.7)' : 'none',
         top: visible ? '0' : '-100px'
     };
@@ -500,26 +538,60 @@ const Header = () => {
     );
 };
 
-const Hero = () => (
-    <section id="hero" style={styles.hero}>
-        <div style={styles.container}>
-            <p style={styles.heroSubtitle}>Hi, my name is</p>
-            <h1 style={styles.heroTitle}>Muhammad Musab.</h1>
-            <h2 style={styles.heroTagline}>I build results for the web.</h2>
-            <p style={styles.heroDescription}>I'm a Digital Marketing Specialist, AI Ad Creator, and SEO expert dedicated to driving growth and maximizing online visibility. I turn data-driven insights into powerful marketing strategies.</p>
-            <div style={styles.heroButtonContainer}>
-                <a href="#contact"><button style={styles.ctaButton} onMouseOver={e => e.target.style.transform = 'translateY(-3px)'} onMouseOut={e => e.target.style.transform = 'none'}>Get In Touch</button></a>
+const Hero = () => {
+    const [text, setText] = useState('');
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [loopNum, setLoopNum] = useState(0);
+    const [typingSpeed, setTypingSpeed] = useState(150);
+
+    useEffect(() => {
+        const handleTyping = () => {
+            const i = loopNum % typingTexts.length;
+            const fullText = typingTexts[i];
+            
+            setText(isDeleting ? fullText.substring(0, text.length - 1) : fullText.substring(0, text.length + 1));
+            
+            if (!isDeleting && text === fullText) {
+                setTimeout(() => setIsDeleting(true), 2000);
+            } else if (isDeleting && text === '') {
+                setIsDeleting(false);
+                setLoopNum(loopNum + 1);
+            }
+            
+            setTypingSpeed(isDeleting ? 75 : 150);
+        };
+        const timer = setTimeout(handleTyping, typingSpeed);
+        return () => clearTimeout(timer);
+    }, [text, isDeleting, loopNum, typingSpeed]);
+
+    return (
+        <section id="hero" style={styles.hero}>
+            <div style={{position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: -1}}>
+                <div id="stars"></div><div id="stars2"></div>
             </div>
-        </div>
-    </section>
-);
+            <div style={styles.container}>
+                <p style={styles.heroSubtitle}>Hi, my name is</p>
+                <h1 style={styles.heroTitle}>Muhammad Musab.</h1>
+                <h2 style={styles.heroTagline}>{text}<span style={{color: '#0ea5e9'}}>|</span></h2>
+                <p style={styles.heroDescription}>I'm a Digital Marketing Specialist, AI Ad Creator, and SEO expert dedicated to driving growth and maximizing online visibility. I turn data-driven insights into powerful marketing strategies.</p>
+                <div style={styles.heroButtonContainer}>
+                    <a href="#contact"><button style={styles.ctaButton} onMouseOver={e => e.target.style.transform = 'translateY(-3px)'} onMouseOut={e => e.target.style.transform = 'none'}>Get In Touch</button></a>
+                </div>
+            </div>
+            <a href="#about" onClick={(e) => { e.preventDefault(); document.getElementById('about').scrollIntoView({ behavior: 'smooth' }); }} style={{ ...styles.scrollIndicator, textDecoration: 'none' }}>
+                <span>SCROLL DOWN</span>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ animation: 'bounce 2s infinite' }}><path d="M12 5V19M12 19L19 12M12 19L5 12" stroke="#0ea5e9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </a>
+        </section>
+    );
+};
 
 const Section = ({ id, title, children }) => {
     const [ref, isVisible] = useOnScreen({ threshold: 0.1 });
     return (
         <section id={id} ref={ref} style={{...styles.section, ...(isVisible && styles.sectionVisible)}}>
             <div style={styles.container}>
-                <h2 style={styles.sectionTitle}><span style={styles.sectionTitleLine}></span>{title}<span style={styles.sectionTitleLine}></span></h2>
+                <h2 style={styles.sectionTitle}>{title}</h2>
                 {children}
             </div>
         </section>
@@ -528,36 +600,98 @@ const Section = ({ id, title, children }) => {
 
 const About = () => {
     const [isMobile, setIsMobile] = useState(false);
+    const [activeTab, setActiveTab] = useState('skills');
+
     useEffect(() => {
-        const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+        const checkMobile = () => setIsMobile(window.innerWidth <= 850);
         checkMobile();
         window.addEventListener('resize', checkMobile);
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
     const aboutContentStyle = isMobile ? {...styles.aboutContent, gridTemplateColumns: '1fr', textAlign: 'center'} : styles.aboutContent;
+    
+    const skillHover = (e) => { e.currentTarget.style.borderColor = '#0ea5e9'; e.currentTarget.style.color = '#f8fafc'; }
+    const skillLeave = (e) => { e.currentTarget.style.borderColor = '#1e293b'; e.currentTarget.style.color = '#94a3b8'; }
+
+    const TabButton = ({ id, children }) => (
+        <button 
+            style={{...styles.tabButton, ...(activeTab === id ? styles.activeTab : {})}} 
+            onClick={() => setActiveTab(id)}
+        >
+            {children}
+            {activeTab === id && <div style={{position: 'absolute', bottom: 0, left: 0, right: 0, height: '2px', background: '#0ea5e9'}}></div>}
+        </button>
+    );
+    
+    const experienceData = [
+        { role: "Digital Marketing Lead", company: "Innovative Tech Inc.", years: "2020 - Present" },
+        { role: "SEO Specialist", company: "Web Solutions Co.", years: "2018 - 2020" },
+    ];
+
+    const educationData = [
+        { degree: "Google Digital Marketing Certificate", university: "Google", years: "2021" },
+    ];
 
     return (
         <Section id="about" title="About Me">
             <div style={aboutContentStyle}>
-                <div style={{ order: isMobile ? 2 : 1 }}>
+                <div style={{...styles.aboutImageContainer, order: isMobile ? 1 : 2, margin: isMobile ? '0 auto 2rem auto' : '0 auto'}}
+                     onMouseOver={e => {
+                        e.currentTarget.style.transform = 'translateY(-5px)';
+                        e.currentTarget.style.boxShadow = '0 10px 40px rgba(14, 165, 233, 0.5)';
+                     }}
+                     onMouseOut={e => {
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = '0 0 30px rgba(14, 165, 233, 0.3)';
+                     }}
+                >
+                    <img src="https://placehold.co/400x400/020617/0ea5e9?text=MM" alt="Muhammad Musab" style={styles.aboutImage} />
+                </div>
+                <div style={{...styles.aboutTextContainer, order: isMobile ? 2 : 1 }}>
                     <p style={{...styles.heroDescription, maxWidth: '100%', textAlign: isMobile ? 'center' : 'left'}}>
                         Hello! I'm Muhammad Musab, a passionate digital marketer with a knack for leveraging technology to achieve outstanding results. My journey in the digital world began with a fascination for how businesses connect with their audiences online. Today, I specialize in creating intelligent, AI-powered advertising campaigns that captivate and convert.
-                        <br /><br />
-                        My expertise also lies in the intricate world of SEO, combining technical precision with creative strategy to build a robust and sustainable online presence for my clients.
                     </p>
-                    <div style={styles.skillsContainer}>
-                        <ul style={styles.skillsGrid}>
-                            {skills.map((skill, i) => (
-                                <li key={i} style={styles.skillItem}>
-                                    <span style={{color: '#0ea5e9'}}>▹</span> {skill}
-                                </li>
-                            ))}
-                        </ul>
+                    
+                    <div style={styles.tabsContainer}>
+                        <TabButton id="skills">Skills</TabButton>
+                        <TabButton id="experience">Experience</TabButton>
+                        <TabButton id="education">Education</TabButton>
                     </div>
-                </div>
-                <div style={{...styles.aboutImageContainer, order: isMobile ? 1 : 2, margin: isMobile ? '0 auto 2rem auto' : '0 auto'}}>
-                    <img src="https://placehold.co/400x400/0f172a/0ea5e9?text=MM" alt="Muhammad Musab" style={styles.aboutImage} />
+
+                    <div style={styles.tabContent}>
+                        {activeTab === 'skills' && (
+                             <ul style={styles.skillsGrid}>
+                                {skills.map((skill, i) => (
+                                    <li key={i} style={styles.skillItem} onMouseOver={skillHover} onMouseOut={skillLeave}>
+                                        <span style={{color: '#0ea5e9'}}>▹</span> {skill}
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                        {activeTab === 'experience' && (
+                            <div>
+                                {experienceData.map((exp, i) => (
+                                    <div key={i} style={{marginBottom: '1rem'}}>
+                                        <h3 style={{...styles.serviceTitle, fontSize: '1.2rem', margin: 0}}>{exp.role}</h3>
+                                        <p style={{color: '#0ea5e9', margin: '0.25rem 0'}}>{exp.company}</p>
+                                        <p style={{color: '#94a3b8', margin: 0, fontSize: '0.9rem'}}>{exp.years}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                        {activeTab === 'education' && (
+                            <div>
+                                {educationData.map((edu, i) => (
+                                    <div key={i} style={{marginBottom: '1rem'}}>
+                                        <h3 style={{...styles.serviceTitle, fontSize: '1.2rem', margin: 0}}>{edu.degree}</h3>
+                                        <p style={{color: '#0ea5e9', margin: '0.25rem 0'}}>{edu.university}</p>
+                                        <p style={{color: '#94a3b8', margin: 0, fontSize: '0.9rem'}}>{edu.years}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </Section>
@@ -567,17 +701,17 @@ const About = () => {
 const Services = () => (
     <Section id="services" title="What I Do">
         <div style={styles.servicesGrid}>
-            <div style={styles.serviceCard} onMouseOver={(e) => {e.currentTarget.style.transform = 'translateY(-10px)'; e.currentTarget.style.borderColor = '#0ea5e9';}} onMouseOut={(e) => {e.currentTarget.style.transform = 'none'; e.currentTarget.style.borderColor = '#1e293b';}}>
+            <div style={styles.serviceCard} onMouseOver={(e) => {e.currentTarget.style.transform = 'translateY(-10px)'; e.currentTarget.style.borderColor = '#0ea5e9'; e.currentTarget.style.boxShadow = '0 10px 30px rgba(14, 165, 233, 0.2)';}} onMouseOut={(e) => {e.currentTarget.style.transform = 'none'; e.currentTarget.style.borderColor = '#1e293b'; e.currentTarget.style.boxShadow = '0 4px 10px rgba(0, 0, 0, 0.2)';}}>
                 <div style={styles.serviceIcon}><DigitalMarketingIcon /></div>
                 <h3 style={styles.serviceTitle}>Digital Marketing</h3>
                 <p style={styles.serviceDescription}>Crafting comprehensive digital strategies that encompass everything from social media management to email marketing, ensuring a cohesive and powerful brand message.</p>
             </div>
-            <div style={styles.serviceCard} onMouseOver={(e) => {e.currentTarget.style.transform = 'translateY(-10px)'; e.currentTarget.style.borderColor = '#0ea5e9';}} onMouseOut={(e) => {e.currentTarget.style.transform = 'none'; e.currentTarget.style.borderColor = '#1e293b';}}>
+            <div style={styles.serviceCard} onMouseOver={(e) => {e.currentTarget.style.transform = 'translateY(-10px)'; e.currentTarget.style.borderColor = '#0ea5e9'; e.currentTarget.style.boxShadow = '0 10px 30px rgba(14, 165, 233, 0.2)';}} onMouseOut={(e) => {e.currentTarget.style.transform = 'none'; e.currentTarget.style.borderColor = '#1e293b'; e.currentTarget.style.boxShadow = '0 4px 10px rgba(0, 0, 0, 0.2)';}}>
                 <div style={styles.serviceIcon}><AiIcon /></div>
                 <h3 style={styles.serviceTitle}>AI Ad Creation</h3>
                 <p style={styles.serviceDescription}>Utilizing cutting-edge AI tools to generate highly effective ad creatives, optimize campaign bidding, and deliver personalized ad experiences that maximize ROI.</p>
             </div>
-            <div style={styles.serviceCard} onMouseOver={(e) => {e.currentTarget.style.transform = 'translateY(-10px)'; e.currentTarget.style.borderColor = '#0ea5e9';}} onMouseOut={(e) => {e.currentTarget.style.transform = 'none'; e.currentTarget.style.borderColor = '#1e293b';}}>
+            <div style={styles.serviceCard} onMouseOver={(e) => {e.currentTarget.style.transform = 'translateY(-10px)'; e.currentTarget.style.borderColor = '#0ea5e9'; e.currentTarget.style.boxShadow = '0 10px 30px rgba(14, 165, 233, 0.2)';}} onMouseOut={(e) => {e.currentTarget.style.transform = 'none'; e.currentTarget.style.borderColor = '#1e293b'; e.currentTarget.style.boxShadow = '0 4px 10px rgba(0, 0, 0, 0.2)';}}>
                 <div style={styles.serviceIcon}><SeoIcon /></div>
                 <h3 style={styles.serviceTitle}>SEO Specialist</h3>
                 <p style={styles.serviceDescription}>Performing in-depth keyword research, on-page and off-page optimization, and technical SEO audits to climb search rankings and capture organic traffic.</p>
@@ -593,23 +727,22 @@ const Portfolio = () => (
                 <div key={index} style={styles.portfolioCard} 
                      onMouseOver={(e) => {
                         e.currentTarget.style.transform = 'translateY(-5px)';
-                        e.currentTarget.querySelector('.portfolio-overlay').style.opacity = 1;
-                        e.currentTarget.querySelector('.portfolio-image').style.transform = 'scale(1.05)';
+                        e.currentTarget.style.boxShadow = '0 10px 30px rgba(14, 165, 233, 0.2)';
+                        e.currentTarget.querySelector('.portfolio-content').style.transform = 'translateY(0)';
+                        e.currentTarget.querySelector('.portfolio-content').style.visibility = 'visible';
                      }} 
                      onMouseOut={(e) => {
                         e.currentTarget.style.transform = 'none';
-                        e.currentTarget.querySelector('.portfolio-overlay').style.opacity = 0;
-                        e.currentTarget.querySelector('.portfolio-image').style.transform = 'scale(1)';
+                        e.currentTarget.style.boxShadow = '0 4px 10px rgba(0, 0, 0, 0.2)';
+                        e.currentTarget.querySelector('.portfolio-content').style.transform = 'translateY(100%)';
+                        e.currentTarget.querySelector('.portfolio-content').style.visibility = 'hidden';
                      }}>
-                    <div style={styles.portfolioImageContainer}>
-                         <img src={item.imageUrl} alt={item.title} style={styles.portfolioImage} className="portfolio-image"/>
-                         <div style={styles.portfolioOverlay} className="portfolio-overlay">
-                            <a href={item.liveUrl} target="_blank" rel="noopener noreferrer" style={styles.portfolioLink} onMouseOver={e => e.currentTarget.style.backgroundColor = '#0ea5e9'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}><ExternalLinkIcon/></a>
-                         </div>
-                    </div>
-                    <div style={styles.portfolioContent}>
-                        <h3 style={styles.portfolioTitle}>{item.title}</h3>
-                        <p style={styles.portfolioDescription}>{item.description}</p>
+                    <img src={item.imageUrl} alt={item.title} style={styles.portfolioImage} />
+                    <div className="portfolio-content" style={styles.portfolioContent}>
+                        <div>
+                            <h3 style={styles.portfolioTitle}>{item.title}</h3>
+                            <a href={item.liveUrl} target="_blank" rel="noopener noreferrer" style={{color: '#0ea5e9', textDecoration: 'none'}}>View Project</a>
+                        </div>
                         <div style={styles.portfolioTags}>
                             {item.tags.map((tag, tagIndex) => (<span key={tagIndex} style={styles.portfolioTag}>{tag}</span>))}
                         </div>
@@ -624,7 +757,7 @@ const Testimonials = () => (
     <Section id="testimonials" title="What My Clients Say">
         <div style={styles.testimonialsGrid}>
             {testimonials.map((item, index) => (
-                <div key={index} style={styles.testimonialCard}>
+                <div key={index} style={styles.testimonialCard} onMouseOver={(e) => {e.currentTarget.style.borderColor = '#0ea5e9'; e.currentTarget.style.boxShadow = '0 10px 30px rgba(14, 165, 233, 0.2)';}} onMouseOut={(e) => {e.currentTarget.style.borderColor = '#1e293b'; e.currentTarget.style.boxShadow = 'none';}}>
                     <QuoteIcon />
                     <p style={styles.testimonialQuote}>"{item.quote}"</p>
                     <div>
@@ -651,7 +784,7 @@ const Contact = () => {
                     <input type="text" placeholder="Your Name" required style={styles.formInput} onFocus={handleFocus} onBlur={handleBlur} />
                     <input type="email" placeholder="Your Email" required style={styles.formInput} onFocus={handleFocus} onBlur={handleBlur} />
                     <textarea placeholder="Your Message" required style={{...styles.formInput, minHeight: '150px', resize: 'vertical'}} onFocus={handleFocus} onBlur={handleBlur}></textarea>
-                    <button type="submit" style={{...styles.ctaButton, alignSelf: 'center'}} onMouseOver={e => e.target.style.transform = 'translateY(-3px)'} onMouseOut={e => e.target.style.transform = 'none'}>Send Message</button>
+                    <button type="submit" style={styles.ctaButton} onMouseOver={e => e.target.style.transform = 'translateY(-3px)'} onMouseOut={e => e.target.style.transform = 'none'}>Send Message</button>
                 </form>
             </div>
         </Section>
@@ -675,19 +808,64 @@ const Footer = () => (
     </footer>
 );
 
+const SocialSidebar = () => {
+    const [isMobile, setIsMobile] = useState(false);
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth <= 1080);
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
+    if (isMobile) return null;
+
+    const iconHover = (e) => { e.currentTarget.style.color = '#0ea5e9'; e.currentTarget.style.transform = 'translateY(-3px)'; }
+    const iconLeave = (e) => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.transform = 'translateY(0)'; }
+
+    return (
+        <div style={styles.socialSidebar}>
+            <SocialIcon href="https://linkedin.com" vertical onMouseOver={iconHover} onMouseOut={iconLeave}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+            </SocialIcon>
+            <SocialIcon href="https://github.com" vertical onMouseOver={iconHover} onMouseOut={iconLeave}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+            </SocialIcon>
+             <SocialIcon href="https://twitter.com" vertical onMouseOver={iconHover} onMouseOut={iconLeave}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
+            </SocialIcon>
+            <div style={styles.socialSidebarLine}></div>
+        </div>
+    );
+};
 
 export default function App() {
     useEffect(() => {
         Object.assign(document.body.style, styles.body);
+        
+        // Add Google Fonts
         const link = document.createElement('link');
         link.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap';
         link.rel = 'stylesheet';
         document.head.appendChild(link);
+        
+        // Add CSS for animations
+        const styleSheet = document.createElement("style");
+        styleSheet.type = "text/css";
+        styleSheet.innerText = `
+            @keyframes bounce { 0%, 20%, 50%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-10px); } 60% { transform: translateY(-5px); } }
+            @keyframes move-twink-back { from {background-position:0 0;} to {background-position:-10000px 5000px;} }
+            #stars, #stars2 { position:absolute; top:0; left:0; right:0; bottom:0; width:100%; height:100%; display:block; z-index: -1; }
+            #stars { background:#020617 url(https://www.script-tutorials.com/demos/360/images/stars.png) repeat top center; }
+            #stars2 { background:transparent url(https://www.script-tutorials.com/demos/360/images/twinkling.png) repeat top center; animation:move-twink-back 200s linear infinite; }
+        `;
+        document.head.appendChild(styleSheet);
+        
     }, []);
 
     return (
         <>
             <Header />
+            <SocialSidebar />
             <main>
                 <Hero />
                 <About />
@@ -700,4 +878,6 @@ export default function App() {
         </>
     );
 }
+
+
 
